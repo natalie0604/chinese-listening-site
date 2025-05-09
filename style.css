@@ -37,3 +37,11 @@ h1, h2 {
   font-size: 18px;
   color: #333;
 }
+
+.subtitle.highlight {
+  background-color: #fef3c7;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  color: #b45309;
+}
