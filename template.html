@@ -62,44 +62,51 @@
       padding: 8px 14px;
       font-size: 14px;
     }
+    .pinyin-toggle {
+      margin-top: 10px;
+    }
+    ruby rt {
+      font-size: 0.8em;
+      color: #555;
+    }
     @media screen and (max-width: 768px) {
-  body {
-    font-size: 16px;
-    padding: 10px;
-  }
+      body {
+        font-size: 16px;
+        padding: 10px;
+      }
 
-  .card-container {
-    flex-direction: column;
-    align-items: center;
-  }
+      .card-container {
+        flex-direction: column;
+        align-items: center;
+      }
 
-  .card {
-    width: 90%;
-    margin-bottom: 15px;
-  }
+      .card {
+        width: 90%;
+        margin-bottom: 15px;
+      }
 
-  .player-section {
-    width: 95%;
-    padding: 20px;
-  }
+      .player-section {
+        width: 95%;
+        padding: 20px;
+      }
 
-  audio {
-    width: 100%;
-  }
+      audio {
+        width: 100%;
+      }
 
-  .controls button {
-    font-size: 16px;
-    padding: 10px 16px;
-  }
+      .controls button {
+        font-size: 16px;
+        padding: 10px 16px;
+      }
 
-  .subtitle-box {
-    font-size: 16px;
-  }
+      .subtitle-box {
+        font-size: 16px;
+      }
 
-  h1, h2, h3 {
-    text-align: center;
-  }
-}
+      h1, h2, h3 {
+        text-align: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -131,8 +138,11 @@
       <button onclick="changeSpeed(1.5)">1.5x</button>
       <button onclick="changeSpeed(2)">2x</button>
     </div>
-    <div class="subtitle-box" id="subtitleBox">
-      （此处将加载对应字幕文本）
+    <div class="pinyin-toggle">
+      <button onclick="togglePinyin()">切换拼音显示</button>
+    </div>
+    <div class="subtitle-box">
+      <div id="subtitleText">（此处将加载对应字幕文本）</div>
     </div>
   </div>
 
@@ -155,8 +165,13 @@
       }
     };
 
+    let showingPinyin = false;
+    let currentKey = "";
+
     function loadPractice(key) {
       const data = practiceData[key];
+      currentKey = key;
+      showingPinyin = false;
       document.getElementById('playerSection').style.display = 'block';
       document.getElementById('title').innerText = data.title;
       document.getElementById('audioSource').src = data.audio;
@@ -165,11 +180,37 @@
       fetch(data.subtitle)
         .then(res => res.text())
         .then(text => {
-          document.getElementById('subtitleBox').innerText = text;
+          document.getElementById('subtitleText').innerText = text;
         })
         .catch(err => {
-          document.getElementById('subtitleBox').innerText = '（字幕文件加载失败）';
+          document.getElementById('subtitleText').innerText = '（字幕加载失败）';
         });
+    }
+
+    function togglePinyin() {
+      const data = practiceData[currentKey];
+      if (!data) return;
+
+      const target = document.getElementById('subtitleText');
+
+      if (!showingPinyin) {
+        fetch(`subtitles/${currentKey}_pinyin.html`)
+          .then(res => res.text())
+          .then(html => {
+            target.innerHTML = html;
+            showingPinyin = true;
+          })
+          .catch(() => {
+            target.innerText = '（拼音字幕加载失败）';
+          });
+      } else {
+        fetch(data.subtitle)
+          .then(res => res.text())
+          .then(text => {
+            target.innerText = text;
+            showingPinyin = false;
+          });
+      }
     }
 
     function changeSpeed(rate) {
