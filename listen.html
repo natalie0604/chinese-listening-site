@@ -24,10 +24,16 @@
     </audio>
 
     <div class="controls">
-      <button onclick="changeSpeed(1)">正常速度</button>
-      <button onclick="changeSpeed(1.5)">1.5倍速</button>
-      <button onclick="changeSpeed(2)">2倍速</button>
-      <button onclick="toggleSubtitle()">切换字幕样式</button>
+      <label for="speedRange">播放速度：<span id="speedDisplay">1.00x</span></label><br>
+      <input
+        type="range"
+        id="speedRange"
+        min="0.5"
+        max="2"
+        step="0.05"
+        value="1"
+        oninput="updateSpeed(this.value)"
+      />
     </div>
 
     <div id="subtitle" class="subtitle">
@@ -46,6 +52,12 @@
       const subtitle = document.getElementById('subtitle');
       subtitle.classList.toggle('highlight');
     }
+
+    function updateSpeed(rate) {
+  const speed = parseFloat(rate);
+  document.getElementById('audioPlayer').playbackRate = speed;
+  document.getElementById('speedDisplay').innerText = speed.toFixed(2) + "x";
+}
   </script>
 </body>
 </html>
