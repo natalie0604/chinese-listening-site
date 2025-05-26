@@ -65,6 +65,155 @@
   </style>
 </head>
 <body>
-<!-- 内容保持不变 -->
+  <h1>长城</h1>
+  <div class="player-section">
+    <audio id="audioPlayer" controls>
+      <source src="audio/greatwall.mp3" type="audio/mpeg">
+      您的浏览器不支持音频播放。
+    </audio>
+
+    <div class="controls">
+      <label for="speedRange">播放速度：<span id="speedDisplay">1.00x</span></label><br>
+      <input type="range" id="speedRange" min="0.5" max="2" step="0.05" value="1" oninput="updateSpeed(this.value)" />
+    </div>
+
+    <div class="pinyin-toggle">
+      <button onclick="togglePinyin()">切换拼音显示</button>
+    </div>
+
+    <div class="subtitle-box">
+      <div id="subtitleText">（此处将加载字幕）</div>
+    </div>
+
+    <div class="question-section">
+      <h3>📝 听力理解练习</h3>
+
+      <div class="question" id="q1">
+        <p>1. 长城的主要作用是什么？</p>
+        <div class="options">
+          <button onclick="selectOption(this, 'q1', 'A')">A. 商业交流</button>
+          <button onclick="selectOption(this, 'q1', 'B')">B. 农业发展</button>
+          <button onclick="selectOption(this, 'q1', 'C')">C. 防御敌人</button>
+          <button onclick="selectOption(this, 'q1', 'D')">D. 交通运输</button>
+        </div>
+      </div>
+
+      <div class="question" id="q2">
+        <p>2. 长城跨越哪些地理区域？</p>
+        <div class="options">
+          <button onclick="selectOption(this, 'q2', 'A')">A. 高山和沙漠</button>
+          <button onclick="selectOption(this, 'q2', 'B')">B. 平原和湖泊</button>
+          <button onclick="selectOption(this, 'q2', 'C')">C. 丘陵和草原</button>
+          <button onclick="selectOption(this, 'q2', 'D')">D. 江河和海洋</button>
+        </div>
+      </div>
+
+      <div class="question" id="q3">
+        <p>3. 游客为什么参观长城？</p>
+        <div class="options">
+          <button onclick="selectOption(this, 'q3', 'A')">A. 体验文化</button>
+          <button onclick="selectOption(this, 'q3', 'B')">B. 购物旅游</button>
+          <button onclick="selectOption(this, 'q3', 'C')">C. 寻找亲戚</button>
+          <button onclick="selectOption(this, 'q3', 'D')">D. 学习农业</button>
+        </div>
+      </div>
+
+      <button onclick="submitAnswers()" style="margin-top: 30px; padding: 10px 20px; font-size: 16px;">提交答案</button>
+
+      <div class="result-box" id="resultBox" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    function updateSpeed(rate) {
+      const speed = parseFloat(rate);
+      document.getElementById('audioPlayer').playbackRate = speed;
+      document.getElementById('speedDisplay').innerText = speed.toFixed(2) + "x";
+    }
+
+    let showingPinyin = false;
+    function togglePinyin() {
+      fetch(showingPinyin ? 'subtitles/greatwall.txt' : 'subtitles/greatwall_pinyin.html')
+        .then(res => res.text())
+        .then(data => {
+          const box = document.getElementById('subtitleText');
+          showingPinyin ? box.innerText = data : box.innerHTML = data;
+          showingPinyin = !showingPinyin;
+        })
+        .catch(() => {
+          document.getElementById('subtitleText').innerText = '（字幕加载失败）';
+        });
+    }
+
+    window.onload = () => {
+      fetch('subtitles/greatwall.txt')
+        .then(res => res.text())
+        .then(text => {
+          document.getElementById('subtitleText').innerText = text;
+        });
+    };
+
+    const correctAnswers = {
+      q1: 'C',
+      q2: 'A',
+      q3: 'A'
+    };
+
+    const explanations = {
+      q1: '✅ 答案：C<br>📘 解析：文中说长城是中国古代的防御工程。',
+      q2: '✅ 答案：A<br>📘 解析：文中提到长城穿越高山和沙漠。',
+      q3: '✅ 答案：A<br>📘 解析：许多游客参观长城是为了体验中华文化。'
+    };
+
+    const userAnswers = {};
+
+    function selectOption(button, questionId, selectedOption) {
+      userAnswers[questionId] = selectedOption;
+      const buttons = button.parentElement.querySelectorAll('button');
+      buttons.forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+    }
+
+    function submitAnswers() {
+      let correct = 0;
+      let total = 0;
+      let wrongList = [];
+      let html = '';
+
+      for (const qid in correctAnswers) {
+        total++;
+        const correctAnswer = correctAnswers[qid];
+        const userAnswer = userAnswers[qid];
+
+        const questionEl = document.getElementById(qid);
+        const buttons = questionEl.querySelectorAll('button');
+        buttons.forEach(btn => {
+          btn.disabled = true;
+          const opt = btn.innerText.charAt(0);
+          if (opt === correctAnswer) btn.classList.add('correct');
+          if (opt === userAnswer && userAnswer !== correctAnswer) btn.classList.add('wrong');
+        });
+
+        if (userAnswer === correctAnswer) {
+          correct++;
+        } else {
+          wrongList.push(qid.toUpperCase().replace('Q', '第') + '题');
+        }
+      }
+
+      html += `<p>✅ 共答对 ${correct}/${total} 题，正确率 ${(correct / total * 100).toFixed(0)}%</p>`;
+      if (wrongList.length > 0) {
+        html += `<p>❌ 答错题目：${wrongList.join('，')}</p>`;
+      }
+      html += '<hr>';
+      for (const qid in explanations) {
+        html += `<p><strong>${qid.toUpperCase().replace('Q', '第')}题</strong><br>${explanations[qid]}</p>`;
+      }
+
+      const resultBox = document.getElementById('resultBox');
+      resultBox.innerHTML = html;
+      resultBox.style.display = 'block';
+    }
+  </script>
 </body>
 </html>
