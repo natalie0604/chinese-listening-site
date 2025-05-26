@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>长城</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #005bbb;
+    }
+    .player-section {
+      max-width: 700px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .controls, .pinyin-toggle, .subtitle-box, .question-section {
+      margin-top: 20px;
+    }
+    .controls label {
+      font-weight: bold;
+    }
+    .subtitle-box {
+      background-color: #f0f0f0;
+      padding: 15px;
+      border-radius: 5px;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .question {
+      margin-top: 20px;
+    }
+    .options button {
+      display: block;
+      margin: 6px 0;
+      padding: 8px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+    }
+    .options button.correct {
+      background-color: #c8f7c5;
+    }
+    .options button.wrong {
+      background-color: #f7c5c5;
+    }
+    .explanation {
+      font-size: 14px;
+      margin-top: 6px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>长城</h1>
+  <div class="player-section">
+    <audio id="audioPlayer" controls>
+      <source src="audio/greatwall.mp3" type="audio/mpeg">
+      您的浏览器不支持音频播放。
+    </audio>
+
+    <div class="controls">
+      <label for="speedRange">播放速度：<span id="speedDisplay">1.00x</span></label><br>
+      <input type="range" id="speedRange" min="0.5" max="2" step="0.05" value="1" oninput="updateSpeed(this.value)" />
+    </div>
+
+    <div class="pinyin-toggle">
+      <button onclick="togglePinyin()">切换拼音显示</button>
+    </div>
+
+    <div class="subtitle-box">
+      <div id="subtitleText">（此处将加载字幕）</div>
+    </div>
+
+    <div class="question-section">
+      <h3>📝 听力理解练习</h3>
+
+      <div class="question" id="q1">
+        <p>1. 长城最主要的作用是什么？</p>
+        <div class="options">
+          <button onclick="checkAnswer(this, 'q1', 'B')">A. 农业灌溉系统</button>
+          <button onclick="checkAnswer(this, 'q1', 'B')">B. 古代防御工程</button>
+          <button onclick="checkAnswer(this, 'q1', 'B')">C. 王宫居住区域</button>
+          <button onclick="checkAnswer(this, 'q1', 'B')">D. 文化节庆场所</button>
+        </div>
+        <div class="explanation" id="exp-q1" style="display:none;">✅ 答案：B<br>📘 解析：文中指出“长城是中国古代的防御工程”。</div>
+      </div>
+
+      <div class="question" id="q2">
+        <p>2. 关于长城的路线，下列哪项正确？</p>
+        <div class="options">
+          <button onclick="checkAnswer(this, 'q2', 'C')">A. 只穿过城市地区</button>
+          <button onclick="checkAnswer(this, 'q2', 'C')">B. 位于海边地区</button>
+          <button onclick="checkAnswer(this, 'q2', 'C')">C. 穿越高山和沙漠</button>
+          <button onclick="checkAnswer(this, 'q2', 'C')">D. 沿河而建</button>
+        </div>
+        <div class="explanation" id="exp-q2" style="display:none;">✅ 答案：C<br>📘 解析：原文说“它蜿蜒起伏，穿越高山和沙漠”。</div>
+      </div>
+
+      <div class="question" id="q3">
+        <p>3. 长城在文化上具有怎样的意义？</p>
+        <div class="options">
+          <button onclick="checkAnswer(this, 'q3', 'B')">A. 是一处体育赛事场地</button>
+          <button onclick="checkAnswer(this, 'q3', 'B')">B. 是中华文明的重要象征</button>
+          <button onclick="checkAnswer(this, 'q3', 'B')">C. 是现代交通要道</button>
+          <button onclick="checkAnswer(this, 'q3', 'B')">D. 是自然风景名胜</button>
+        </div>
+        <div class="explanation" id="exp-q3" style="display:none;">✅ 答案：B<br>📘 解析：原文直接说“长城是中华文明的重要象征”。</div>
+      </div>
+
+      <div class="question" id="q4">
+        <p>4. 以下哪项不是提到的长城特征？</p>
+        <div class="options">
+          <button onclick="checkAnswer(this, 'q4', 'C')">A. 蜿蜒起伏</button>
+          <button onclick="checkAnswer(this, 'q4', 'C')">B. 穿越高山</button>
+          <button onclick="checkAnswer(this, 'q4', 'C')">C. 建于现代</button>
+          <button onclick="checkAnswer(this, 'q4', 'C')">D. 是防御工程</button>
+        </div>
+        <div class="explanation" id="exp-q4" style="display:none;">✅ 答案：C<br>📘 解析：音频中强调“古代防御工程”，不是现代建造。</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateSpeed(rate) {
+      const speed = parseFloat(rate);
+      document.getElementById('audioPlayer').playbackRate = speed;
+      document.getElementById('speedDisplay').innerText = speed.toFixed(2) + "x";
+    }
+
+    let showingPinyin = false;
+    function togglePinyin() {
+      fetch(showingPinyin ? 'subtitles/greatwall.txt' : 'subtitles/greatwall_pinyin.html')
+        .then(res => res.text())
+        .then(data => {
+          const box = document.getElementById('subtitleText');
+          showingPinyin ? box.innerText = data : box.innerHTML = data;
+          showingPinyin = !showingPinyin;
+        })
+        .catch(() => {
+          document.getElementById('subtitleText').innerText = '（字幕加载失败）';
+        });
+    }
+
+    window.onload = () => {
+      fetch('subtitles/greatwall.txt')
+        .then(res => res.text())
+        .then(text => {
+          document.getElementById('subtitleText').innerText = text;
+        });
+    };
+
+    function checkAnswer(button, questionId, correctAnswer) {
+      const allOptions = button.parentElement.querySelectorAll('button');
+      allOptions.forEach(btn => {
+        btn.disabled = true;
+        if (btn.innerText.startsWith(correctAnswer)) {
+          btn.classList.add('correct');
+        } else {
+          btn.classList.add('wrong');
+        }
+      });
+      document.getElementById('exp-' + questionId).style.display = 'block';
+    }
+  </script>
+</body>
+</html>
