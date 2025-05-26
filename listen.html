@@ -44,10 +44,7 @@
   </div>
 
   <script>
-    function changeSpeed(rate) {
-      document.getElementById('player').playbackRate = rate;
-    }
-
+    
     function toggleSubtitle() {
       const subtitle = document.getElementById('subtitle');
       subtitle.classList.toggle('highlight');
@@ -55,7 +52,7 @@
 
     function updateSpeed(rate) {
   const speed = parseFloat(rate);
-  document.getElementById('audioPlayer').playbackRate = speed;
+  document.getElementById('player').playbackRate = speed;
   document.getElementById('speedDisplay').innerText = speed.toFixed(2) + "x";
 }
   </script>
