@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>一年四季</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #005bbb;
+    }
+    .player-section {
+      max-width: 700px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .controls, .pinyin-toggle, .subtitle-box, .question-section {
+      margin-top: 20px;
+    }
+    .controls label {
+      font-weight: bold;
+    }
+    .subtitle-box {
+      background-color: #f0f0f0;
+      padding: 15px;
+      border-radius: 5px;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .question {
+      margin-top: 20px;
+    }
+    .options button {
+      display: block;
+      margin: 6px 0;
+      padding: 8px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+    }
+    .options button.selected {
+      background-color: #dceeff;
+    }
+    .options button.selected.correct {
+      background-color: #c8f7c5;
+    }
+    .options button.selected.wrong {
+      background-color: #f7c5c5;
+    }
+    .result-box {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #e9f5ff;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>一年四季</h1>
+  <div class="player-section">
+    <audio id="audioPlayer" controls>
+      <source src="audio/season.mp3" type="audio/mpeg">
+      您的浏览器不支持音频播放。
+    </audio>
+
+    <div class="controls">
+      <label for="speedRange">播放速度：<span id="speedDisplay">1.00x</span></label><br>
+      <input type="range" id="speedRange" min="0.5" max="2" step="0.05" value="1" oninput="updateSpeed(this.value)" />
+    </div>
+
+    <div class="pinyin-toggle">
+      <button onclick="togglePinyin()">切换拼音显示</button>
+    </div>
+
+    <div class="subtitle-box">
+      <div id="subtitleText">（此处将加载字幕）</div>
+    </div>
+
+    <div class="question-section">
+      <h3>📝 听力理解练习</h3>
+
+      <div class="question" id="q1">
+        <p>1. 一年中最冷的季节是哪个？</p>
+        <div class="options">
+          <button onclick="selectOption(this, 'q1', 'A')">A. 冬天</button>
+          <button onclick="selectOption(this, 'q1', 'B')">B. 春天</button>
+          <button onclick="selectOption(this, 'q1', 'C')">C. 夏天</button>
+          <button onclick="selectOption(this, 'q1', 'D')">D. 秋天</button>
+        </div>
+      </div>
+
+      <div class="question" id="q2">
+        <p>2. 夏天的天气通常是怎样的？</p>
+        <div class="options">
+          <button onclick="selectOption(this, 'q2', 'A')">A. 寒冷干燥</button>
+          <button onclick="selectOption(this, 'q2', 'B')">B. 温暖多风</button>
+          <button onclick="selectOption(this, 'q2', 'C')">C. 炎热潮湿</button>
+          <button onclick="selectOption(this, 'q2', 'D')">D. 清凉宜人</button>
+        </div>
+      </div>
+
+      <div class="question" id="q3">
+        <p>3. 秋天常常让人联想到什么？</p>
+        <div class="options">
+          <button onclick="selectOption(this, 'q3', 'A')">A. 春暖花开</button>
+          <button onclick="selectOption(this, 'q3', 'B')">B. 冰雪覆盖</button>
+          <button onclick="selectOption(this, 'q3', 'C')">C. 炎炎烈日</button>
+          <button onclick="selectOption(this, 'q3', 'D')">D. 收获与落叶</button>
+        </div>
+      </div>
+
+      <button onclick="submitAnswers()" style="margin-top: 30px; padding: 10px 20px; font-size: 16px;">提交答案</button>
+
+      <div class="result-box" id="resultBox" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    function updateSpeed(rate) {
+      const speed = parseFloat(rate);
+      document.getElementById('audioPlayer').playbackRate = speed;
+      document.getElementById('speedDisplay').innerText = speed.toFixed(2) + "x";
+    }
+
+    let showingPinyin = false;
+    function togglePinyin() {
+      fetch(showingPinyin ? 'subtitles/season.txt' : 'subtitles/season_pinyin.html')
+        .then(res => res.text())
+        .then(data => {
+          const box = document.getElementById('subtitleText');
+          showingPinyin ? box.innerText = data : box.innerHTML = data;
+          showingPinyin = !showingPinyin;
+        })
+        .catch(() => {
+          document.getElementById('subtitleText').innerText = '（字幕加载失败）';
+        });
+    }
+
+    window.onload = () => {
+      fetch('subtitles/season.txt')
+        .then(res => res.text())
+        .then(text => {
+          document.getElementById('subtitleText').innerText = text;
+        });
+    };
+
+    const correctAnswers = {
+      q1: 'A',
+      q2: 'C',
+      q3: 'D'
+    };
+
+    const explanations = {
+      q1: '✅ 答案：A<br>📘 解析：冬天是一年中最冷的季节。',
+      q2: '✅ 答案：C<br>📘 解析：夏天气温高、空气湿润，常描述为炎热潮湿。',
+      q3: '✅ 答案：D<br>📘 解析：秋天常与收获、落叶相关联。'
+    };
+
+    const userAnswers = {};
+
+    function selectOption(button, questionId, selectedOption) {
+      userAnswers[questionId] = selectedOption;
+      const buttons = button.parentElement.querySelectorAll('button');
+      buttons.forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+    }
+
+    function submitAnswers() {
+      let correct = 0;
+      let total = 0;
+      let wrongList = [];
+      let html = '';
+
+      for (const qid in correctAnswers) {
+        total++;
+        const correctAnswer = correctAnswers[qid];
+        const userAnswer = userAnswers[qid];
+
+        const questionEl = document.getElementById(qid);
+        const buttons = questionEl.querySelectorAll('button');
+        buttons.forEach(btn => {
+          btn.disabled = true;
+          const opt = btn.innerText.charAt(0);
+          if (opt === correctAnswer) btn.classList.add('correct');
+          if (opt === userAnswer && userAnswer !== correctAnswer) btn.classList.add('wrong');
+        });
+
+        if (userAnswer === correctAnswer) {
+          correct++;
+        } else {
+          wrongList.push(qid.toUpperCase().replace('Q', '第') + '题');
+        }
+      }
+
+      html += `<p>✅ 共答对 ${correct}/${total} 题，正确率 ${(correct / total * 100).toFixed(0)}%</p>`;
+      if (wrongList.length > 0) {
+        html += `<p>❌ 答错题目：${wrongList.join('，')}</p>`;
+      }
+      html += '<hr>';
+      for (const qid in explanations) {
+        html += `<p><strong>${qid.toUpperCase().replace('Q', '第')}题</strong><br>${explanations[qid]}</p>`;
+      }
+
+      const resultBox = document.getElementById('resultBox');
+      resultBox.innerHTML = html;
+      resultBox.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
